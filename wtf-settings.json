@@ -1,0 +1,6 @@
+{
+    "Model": "qwen3:8b",
+    "Shell": "bash",
+    "LongThink": true,
+    "Debug": false
+}
