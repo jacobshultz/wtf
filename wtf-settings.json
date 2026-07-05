@@ -1,6 +1,6 @@
 {
-    "Model": "qwen3:8b",
-    "Shell": "bash",
-    "LongThink": true,
+    "Model": "qwen3:4b",
+    "LongThink": false,
+    "UseTools": false,
     "Debug": false
 }
