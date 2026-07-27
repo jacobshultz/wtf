@@ -1,5 +1,5 @@
 from ollama import chat, web_fetch, web_search, ChatResponse
-from wtf_cli.wtf_data import Settings, get_usr_prompt, get_sys_prompt
+from .data import Settings, get_usr_prompt, get_sys_prompt
 
 available_tools = {'web_search': web_search, 'web_fetch': web_fetch}
 
@@ -20,7 +20,7 @@ class OllamaClient:
                 model=settings.Model,
                 messages=messages,
                 tools=[web_fetch, web_search] if settings.UseTools else None,
-                think=settings.LongThink,
+                think=settings.Think,
             )
 
             if response.message.tool_calls:

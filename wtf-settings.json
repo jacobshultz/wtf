@@ -1,6 +1,7 @@
 {
+    "Version": "1.0.0",
     "Model": "qwen3:4b",
-    "LongThink": false,
+    "Think": false,
     "UseTools": false,
     "Debug": false
 }
