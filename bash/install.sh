@@ -1,59 +1,85 @@
 #!/usr/bin/env sh
-# wtf installer (package route)
-# Usage:  curl -fsSL https://yoursite/install.sh | sh
-#         curl -fsSL https://yoursite/install.sh | sh -s -- v0.1.0   # pin a version
 set -eu
 
 REPO="jacobshultz/wtf"
-VERSION="${latest}"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/wtf"
-INIT_FILE="$CONFIG_DIR/wtf-run.sh"
+RUNNER="$CONFIG_DIR/wtf-run.sh"
+SETTINGS="$CONFIG_DIR/wtf-settings.json"
+PROMPT="$CONFIG_DIR/PROMPT.txt"
 
 # ---------------------------------------------------------------------------
-# 1. Make sure pipx is available
+# Ensure dependencies are available
 # ---------------------------------------------------------------------------
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "error: python is required but not installed." >&2
+  exit 1
+fi
+
 if ! command -v pipx >/dev/null 2>&1; then
   echo "error: pipx is required but not installed." >&2
-  echo "  Debian/Ubuntu:  sudo apt install pipx && pipx ensurepath" >&2
-  echo "  Other:          python3 -m pip install --user pipx && python3 -m pipx ensurepath" >&2
+  exit 1
+fi
+
+if ! command -v ollama >/dev/null 2>&1; then
+  echo "error: ollama is required but not installed." >&2
   exit 1
 fi
 
 # ---------------------------------------------------------------------------
-# 2. Install the package (this puts 'wtf-bin' on PATH)
+# Install the package (this puts 'wtf-bin' on PATH)
 # ---------------------------------------------------------------------------
-if [ "$VERSION" = "latest" ]; then
-  ref="git+https://github.com/$REPO"
-else
-  ref="git+https://github.com/$REPO@$VERSION"
-fi
-
-echo "Installing wtf from $ref ..."
-pipx install --force "$ref"
+echo "Installing wtf from git+https://github.com/$REPO ..."
+pipx install --force "git+https://github.com/jacobshultz/wtf"
 
 # ---------------------------------------------------------------------------
-# 3. Write the shell function that captures $? and recent history
+# Write to the configuration folder
 # ---------------------------------------------------------------------------
 mkdir -p "$CONFIG_DIR"
-cat > "$INIT_FILE" <<'EOF'
-# wtf shell integration — captures the failed command's context and hands it
-# to the wtf-bin executable. Do not rename this to collide with wtf-bin.
+cat > "$RUNNER" <<'EOF'
 wtf() {
-  local exit_code=$?                    # MUST be the first line
-  local hist; hist=$(fc -ln -10)        # last 10 history entries
-  WTF_EXIT="$exit_code" WTF_HISTORY="$hist" wtf-bin "$@"
+  local exit_code=$?
+  local n=1
+  local args=("$@")
+  for i in "${!args[@]}"; do
+    if [[ "${args[$i]}" == "--lines" || "${args[$i]}" == "-l" ]]; then
+      n="${args[$((i+1))]}"
+    fi
+  done
+  local history; history=$(fc -ln -"$n" -1)
+  WTF_EXIT="$exit_code" WTF_HISTORY="$history" command wtf-bin "$@"
 }
 EOF
-echo "Wrote shell function to $INIT_FILE"
+echo "Wrote shell function to $RUNNER"
+
+cat > "$SETTINGS" <<'EOF'
+{
+    "Version": "1.0.0",
+    "Model": "qwen3:4b",
+    "Think": false,
+    "UseTools": false,
+    "Debug": false
+}
+EOF
+echo "Wrote settings to $SETTINGS"
+
+cat > "$PROMPT" <<'EOF'
+You examine command-line errors, determine their sources, and output cause and remedial steps to the user that produced the error.
+If you are unsure of the source or solution(s) to the problem use web search tools if you have access to any.
+THINK EXTREMELY HARD and DO NOT STOP until you have determined the cause of the error.
+THINK EXTREMELY HARD and DO NOT STOP until you have determined remedial options.
+ABSOLUTELY NEVER, UNDER ANY CIRCUMSTANCES output more than one or two paragraph worth of content.
+ABSOLUTELY NEVER, UNDER ANY CIRCUMSTANCES tell the user about the exit code. The user does not care about exit codes.
+EOF
+echo "Wrote settings to $SETTINGS"
 
 # ---------------------------------------------------------------------------
-# 4. Source it from the user's shell rc, idempotently
+# Add the line to bash.rc
 # ---------------------------------------------------------------------------
 add_source_line() {
   rc="$1"
   [ -e "$rc" ] || return 0
-  if ! grep -qF "$INIT_FILE" "$rc"; then
-    printf '\n# wtf shell integration\n[ -f "%s" ] && . "%s"\n' "$INIT_FILE" "$INIT_FILE" >> "$rc"
+  if ! grep -qF "$RUNNER" "$rc"; then
+    printf '\n# wtf shell integration\n[ -f "%s" ] && . "%s"\n' "$RUNNER" "$RUNNER" >> "$rc"
     echo "Added source line to $rc"
   fi
 }
@@ -61,5 +87,5 @@ add_source_line "$HOME/.bashrc"
 add_source_line "$HOME/.zshrc"
 
 echo ""
-echo "Done. Open a new terminal, or run:  . \"$INIT_FILE\""
+echo "Done. Logout, then open a new terminal, or run:  . \"$RUNNER\""
 echo "Then trigger a failing command and type: wtf"
