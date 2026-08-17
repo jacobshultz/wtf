@@ -40,15 +40,15 @@ def key_status() -> bool:
 
 def set_key():
     if path.exists(ENV_PATH):
-        ans = input("It appears you've already set the API key for this utility. Would you like to continue? y/n: ").strip().lower()
+        ans = input("It appears you've already set the API key for this utility. Would you like to overwrite the old entry? y/n: ").strip().lower()
         if ans not in ('y', "yes"): 
             print(f"To view or modify the api key entry visit {ENV_PATH}")
             return
 
-    print("Enter your ollama API key to allow the model to search the internet.")
+    print("\nEnter your ollama API key to allow the model to search the internet.")
     print("Follow the steps at https://docs.ollama.com/capabilities/web-search (see Authentication) then return here.")
-    api_key = getpass.getpass("Paste your Ollama API key: ")
-    with open(ENV_PATH, "a") as e:
+    api_key = getpass.getpass("Paste your Ollama API key: ").strip()
+    with open(ENV_PATH, "w") as e:
         e.write(f"OLLAMA_API_KEY={api_key}\n")
 
     print(f"Done. To view or modify this entry visit {ENV_PATH}")

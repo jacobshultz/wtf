@@ -10,7 +10,6 @@ import traceback
 
 def main():
     settings = load_settings()
-
     try:
         args = bind_and_get_args(settings)
         if args.version: 
@@ -19,7 +18,7 @@ def main():
 
         if args.keygen or not key_status():
             set_key()
-            if args.keygen: return
+            return
 
         HISTORY = os.environ.get("WTF_HISTORY", "")
         EXIT_CODE = os.environ.get("WTF_EXIT", "0")

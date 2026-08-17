@@ -16,7 +16,7 @@ def bind_and_get_args(sett: Settings):
         parser.add_argument("-v", "--version", action="store_true", dest="version", default=False,
                             help="Prints the version of the application")
         parser.add_argument("-k", "--keygen", action="store_true", dest="keygen", default=False,
-                            help="Will prompt the user to enter ollama API key.")
+                            help="Will prompt the user to enter ollama API key")
         args = parser.parse_args()
 
         sett.Debug = args.debug

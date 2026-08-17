@@ -45,7 +45,11 @@ wtf() {
       n="${args[$((i+1))]}"
     fi
   done
-  local history; history=$(fc -ln -"$n" -1)
+  local history
+  history=$(fc -ln -50 -1 \
+    | sed 's/^[[:space:]]*//' \
+    | grep -vE '^wtf($|[[:space:]])' \
+    | tail -n "$n")
   WTF_EXIT="$exit_code" WTF_HISTORY="$history" command wtf-bin "$@"
 }
 EOF

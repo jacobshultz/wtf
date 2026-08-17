@@ -68,8 +68,10 @@ class OllamaClient:
                 think=settings.Think,
             )
 
+            messages.append(response.message)
+
             if response.message.tool_calls:
-                if settings.Debug: print(f"called tools={response.message.tool_calls}")
+                if settings.Debug: print(f"\ncalled tools={response.message.tool_calls}\n")
                 for call in response.message.tool_calls:
                     fn = available_tools.get(call.function.name)
                     if fn is not None:
@@ -88,6 +90,6 @@ class OllamaClient:
                 break
 
         msg = response.message.content
-        if not settings.Think:
+        if not settings.Think and msg is str:
             msg = msg.rsplit("\n", 1)[-1]   # no think returns the model's thinking in the response. grab the last line only (the actual answer).
         return msg
