@@ -1,5 +1,5 @@
 # What's The Fix v1.0.0
-A shell utility which takes error output from any command and has a your local agent research it and provide the fastest routes for fixing it, all without having to `Alt + Tab` out of your shell.
+A shell utility which takes error output from any command and has a your local agent research it and provide the fastest routes for fixing it, all without having to `Alt + Tab` out of your shell. No more copy pasting error messages.
 
 For instance:
 ```
@@ -22,23 +22,34 @@ $ wtf
 
 Yes, these are real examples that I actually ran on my machine locally.
 
-## Min Hardware Reqs
-4 core processor and 16 gigs of RAM.
+## Install
+Supported distros: Windows, Debian (will probably work on other linux distros as well, let me know if you try).
 
-## Dependencies
-Download and install:
+Dependencies:
 - [Ollama](https://ollama.com/download)
 - [Python + pip](https://www.python.org/downloads/)
 - [Pipx](https://github.com/pypa/pipx#install-pipx)
-
-## Install
-Supported distros: Windows, Debian (will probably work on other linux distros as well).
 
 Download the appropriate `install` script for your distro from the repo and execute it. Follow any instructions to resolve conflicts.
 
 Configuration is located at `~/.config/wtf`.
 
-Simply delete this directory and remove the lines from `bashrc` (deb) or the powershell profile (win).
+Simply delete this directory and remove the lines from `bashrc` (deb) or the powershell profile located at `~\Documents\WindowsPowerShell\profile.ps1` (win).
 
+## Enable web search
+
+To enable the web search tools for the local model you must first create an [Ollama API key](https://docs.ollama.com/capabilities/web-search#authentication). Follow the steps under the [Authentication](https://docs.ollama.com/capabilities/web-search#authentication) section.
+
+Navigate to `~/.config/wtf-settings.json`
+
+Set `UseTools` to `true`
+
+The next time you run `wtf` you will be prompted to enter your Ollama API key. Otherwise you can run `wtf --keygen`
+
+Follow the instructions output by the tool.
+
+After this the model will be able to search the web.
+
+---
 ## Dev
 `pipx install --editable .` in repo dir to get a live dev build of the application.

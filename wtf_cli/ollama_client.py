@@ -89,5 +89,5 @@ class OllamaClient:
 
         msg = response.message.content
         if not settings.Think:
-            msg = msg.rsplit("\n", 1)[-1]   # no think returns the model's thinking in the response. grab the last line only.
+            msg = msg.rsplit("\n", 1)[-1]   # no think returns the model's thinking in the response. grab the last line only (the actual answer).
         return msg

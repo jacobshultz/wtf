@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 load_dotenv(dotenv_path=os.path.join(CONFIG_PATH, ".env"))
 from .ollama_client import OllamaClient
-from .data import load_settings
+from .data import load_settings, set_key, key_status
 from .arguments import bind_and_get_args
 import traceback
 
@@ -16,6 +16,10 @@ def main():
         if args.version: 
             print(f"WTF v{settings.Version}\nCreated by Jacob Shultz")
             return
+
+        if args.keygen or not key_status():
+            set_key()
+            if args.keygen: return
 
         HISTORY = os.environ.get("WTF_HISTORY", "")
         EXIT_CODE = os.environ.get("WTF_EXIT", "0")
