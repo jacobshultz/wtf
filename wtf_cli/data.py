@@ -7,9 +7,13 @@ import json
 import itertools
 import threading
 import time
+import getpass
 from yaspin import yaspin
 
 CONFIG_PATH = path.join(Path.home(), ".config", "wtf")
+ENV_PATH = path.join(CONFIG_PATH, ".env")
+SETTINGS_PATH = path.join(CONFIG_PATH, "wtf-settings.json")
+PROMPT_PATH = path.join(CONFIG_PATH, "PROMPT.txt")
 
 @dataclass
 class Settings:
@@ -20,9 +24,35 @@ class Settings:
     Think: bool
 
 def load_settings() -> Settings:
-    with open(path.join(CONFIG_PATH, "wtf-settings.json")) as file:
+    with open(SETTINGS_PATH) as file:
         data = json.load(file)
     return Settings(**data)
+
+def key_status() -> bool:
+    is_fine = True  # fine, do not need to set up
+    if not path.exists(ENV_PATH):
+        print("UseTools is set to true, but you do not have an Ollama API key for the model to use. This will cause errors!")
+        print(f"To suppress this message set UseTools to false in {SETTINGS_PATH}")
+        answer = input("(Recommended) Would you like to set the api key now? y/n: ").strip().lower()
+        is_fine = answer not in ('y', 'yes')    # false means need to set up the key
+    
+    return is_fine
+
+def set_key():
+    if path.exists(ENV_PATH):
+        ans = input("It appears you've already set the API key for this utility. Would you like to overwrite the old entry? y/n: ").strip().lower()
+        if ans not in ('y', "yes"): 
+            print(f"To view or modify the api key entry visit {ENV_PATH}")
+            return
+
+    print("\nEnter your ollama API key to allow the model to search the internet.")
+    print("Follow the steps at https://docs.ollama.com/capabilities/web-search (see Authentication) then return here.")
+    api_key = getpass.getpass("Paste your Ollama API key: ").strip()
+    with open(ENV_PATH, "w") as e:
+        e.write(f"OLLAMA_API_KEY={api_key}\n")
+
+    print(f"Done. To view or modify this entry visit {ENV_PATH}")
+    return
 
 def get_usr_prompt(hist: str, errCode: str) -> str:
     prompt = f'HISTORY: {hist}\n'
@@ -30,7 +60,7 @@ def get_usr_prompt(hist: str, errCode: str) -> str:
     return prompt
 
 def get_sys_prompt() -> str:
-    with open(path.join(CONFIG_PATH, "PROMPT.txt"), encoding="utf-8") as file:
+    with open(PROMPT_PATH, encoding="utf-8") as file:
         return file.read()
     
 def _roll_thinking_synonym() -> str:

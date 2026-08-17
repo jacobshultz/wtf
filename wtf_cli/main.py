@@ -3,18 +3,21 @@ from dotenv import load_dotenv
 import os
 load_dotenv(dotenv_path=os.path.join(CONFIG_PATH, ".env"))
 from .ollama_client import OllamaClient
-from .data import load_settings
+from .data import load_settings, set_key, key_status
 from .arguments import bind_and_get_args
 import traceback
 
 
 def main():
     settings = load_settings()
-
     try:
         args = bind_and_get_args(settings)
         if args.version: 
             print(f"WTF v{settings.Version}\nCreated by Jacob Shultz")
+            return
+
+        if args.keygen or not key_status():
+            set_key()
             return
 
         HISTORY = os.environ.get("WTF_HISTORY", "")
@@ -27,6 +30,7 @@ def main():
             print(f"history={HISTORY}")
             print(f"errorCode={EXIT_CODE}")
 
+        OllamaClient.ensure_model(settings)
         msg = with_rolling_spinner(lambda: OllamaClient.query(HISTORY, EXIT_CODE, settings))
         print();
         print(msg if msg is not None else "wtf: Model did not answer.")
