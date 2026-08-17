@@ -27,6 +27,7 @@ def main():
             print(f"history={HISTORY}")
             print(f"errorCode={EXIT_CODE}")
 
+        OllamaClient.ensure_model(settings)
         msg = with_rolling_spinner(lambda: OllamaClient.query(HISTORY, EXIT_CODE, settings))
         print();
         print(msg if msg is not None else "wtf: Model did not answer.")

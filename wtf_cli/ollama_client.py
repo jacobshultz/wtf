@@ -1,9 +1,54 @@
-from ollama import chat, web_fetch, web_search, ChatResponse
+import sys
+from ollama import chat, pull, web_fetch, web_search, ChatResponse, ResponseError
+from ollama import list as list_models
 from .data import Settings, get_usr_prompt, get_sys_prompt
 
 available_tools = {'web_search': web_search, 'web_fetch': web_fetch}
 
 class OllamaClient:
+    @staticmethod
+    def model_exists(model: str) -> bool:
+        wanted = model if ':' in model else f'{model}:latest'
+        try:
+            return any(m.model == wanted for m in list_models().models)
+        except ResponseError:
+            return False
+
+    @staticmethod
+    def ensure_model(settings: Settings) -> bool:
+        if OllamaClient.model_exists(settings.Model):
+            return True
+
+        print(f"Model '{settings.Model}' is not installed locally.", file=sys.stderr)
+
+        if not sys.stdin.isatty():
+            print(f"Run: ollama pull {settings.Model}", file=sys.stderr)
+            return False
+
+        try:
+            answer = input("Would you like to pull this model? y/n: ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print(file=sys.stderr)
+            return False
+
+        if answer not in ('y', 'yes'):
+            return False
+
+        try:
+            for progress in pull(settings.Model, stream=True):
+                status = progress.status or ''
+                total, done = progress.total, progress.completed
+                if total and done:
+                    print(f"\r{status}: {done / total * 100:5.1f}%", end='', flush=True)
+                else:
+                    print(f"\r{status} ", end='', flush=True)
+            print()
+        except ResponseError as e:
+            print(f"\nFailed to pull '{settings.Model}': {e}", file=sys.stderr)
+            return False
+
+        return True
+
     @staticmethod
     def query(hist: str, errCode: str, settings: Settings) -> str | None:
         s_prompt = get_sys_prompt()
@@ -42,5 +87,7 @@ class OllamaClient:
             else:
                 break
 
-        msg = response.message
-        return msg.content
+        msg = response.message.content
+        if not settings.Think:
+            msg = msg.rsplit("\n", 1)[-1]   # no think returns the model's thinking in the response. grab the last line only.
+        return msg

@@ -1,7 +1,0 @@
-{
-    "Version": "1.0.0",
-    "Model": "qwen3:4b",
-    "Think": false,
-    "UseTools": false,
-    "Debug": false
-}

@@ -1,4 +1,4 @@
-# What's The Fix
+# What's The Fix v1.0.0
 A shell utility which takes error output from any command and has a your local agent research it and provide the fastest routes for fixing it, all without having to `Alt + Tab` out of your shell.
 
 For instance:
@@ -22,13 +22,23 @@ $ wtf
 
 Yes, these are real examples that I actually ran on my machine locally.
 
+## Min Hardware Reqs
+4 core processor and 16 gigs of RAM.
+
 ## Dependencies
 Download and install:
 - [Ollama](https://ollama.com/download)
 - [Python + pip](https://www.python.org/downloads/)
 - [Pipx](https://github.com/pypa/pipx#install-pipx)
 
-## Debian Install
-1. Download and run github.com/jacobshultz/wtf/bash/install.sh
-2. log out and back in
-3. Run `wtf` to run the command line utility.
+## Install
+Supported distros: Windows, Debian (will probably work on other linux distros as well).
+
+Download the appropriate `install` script for your distro from the repo and execute it. Follow any instructions to resolve conflicts.
+
+Configuration is located at `~/.config/wtf`.
+
+Simply delete this directory and remove the lines from `bashrc` (deb) or the powershell profile (win).
+
+## Dev
+`pipx install --editable .` in repo dir to get a live dev build of the application.

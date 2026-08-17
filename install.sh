@@ -55,7 +55,7 @@ cat > "$SETTINGS" <<'EOF'
 {
     "Version": "1.0.0",
     "Model": "qwen3:4b",
-    "Think": false,
+    "Think": true,
     "UseTools": false,
     "Debug": false
 }
