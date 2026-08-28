@@ -16,7 +16,7 @@ def main():
             print(f"WTF v{settings.Version}\nCreated by Jacob Shultz")
             return
 
-        if args.keygen or not key_status():
+        if args.keygen or not key_status(settings):
             set_key()
             return
 

@@ -28,9 +28,9 @@ def load_settings() -> Settings:
         data = json.load(file)
     return Settings(**data)
 
-def key_status() -> bool:
+def key_status(s: Settings) -> bool:
     is_fine = True  # fine, do not need to set up
-    if not path.exists(ENV_PATH):
+    if not s.UseTools and not path.exists(ENV_PATH):
         print("UseTools is set to true, but you do not have an Ollama API key for the model to use. This will cause errors!")
         print(f"To suppress this message set UseTools to false in {SETTINGS_PATH}")
         answer = input("(Recommended) Would you like to set the api key now? y/n: ").strip().lower()
